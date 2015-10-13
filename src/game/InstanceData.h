@@ -246,12 +246,16 @@ public:
                     stats.clear();
                     return;
                 }
+                uint8 side;
                 uint32 kill_id = result->Fetch()[0].GetUInt32();
                 RealmDataDatabase.BeginTransaction();
                 for (Map::PlayerList::const_iterator i = list.begin(); i != list.end(); ++i)
                 {
                     if (Player* plr = i->getSource())
                     {
+
+                        side = plr->GetTeam();
+
                         if (plr->GetGuildId() == guild_id)
                         {
                             RealmDataDatabase.PExecute("INSERT INTO boss_fights_detailed VALUES (%u,%u,%u,%u,%u)",
@@ -278,8 +282,9 @@ public:
                         {
                             std::string message = "New server record: " + std::to_string(uint32(time(NULL) - m_timer)) + " seconds (last record: "
                                 + std::to_string(last_record) + " seconds) for boss " + names->Fetch()[1].GetCppString()
-                                + " by guild <" + names->Fetch()[0].GetCppString() + ">.";
+                                + " by guild <|cFFFFFFFF" + names->Fetch()[0].GetCppString() + "|r> of " + (side ? "|cFF0000FFAlliance|r." : "|CFFFF0000Horde|r.");
                             
+                            sLog.outLog(LOG_SERVER_RECORDS, message.c_str());
                             sWorld.SendServerMessage(SERVER_MSG_STRING, message.c_str());
                         }
                     }
